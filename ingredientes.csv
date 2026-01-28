@@ -1,10 +1,100 @@
-INGREDIENTE,PORCENTAJE GRASO,SOLIDOS TOTALES,POD,PAC,PROTEINA
-Leche,1.5336,5.112,3.408,21.3,1.4484
-Crema/Nata 35% GRASA,3.5,4.08,0.752,4.7,0.11
-LPD,0,3,2.496,15.6,1.02
-Sacarosa,0,12.8,128,128,0
-Glucosa 38DE,0,2.2,6.38,14.96,0
-Marsala,0,0.45,0,97,0
-Neutro 5,0,0.4,0,0,0
-Yema de huevo,4.65,7.75,0,0,2.449
-Inulina,0,3.36,0,1.75,0
+INGREDIENTES	PORCENTAJE GRASO	SÓLIDOS TOTALES	POD	PAC	LACTOSA	PROTEÍNA
+Leche	3,6	12	0,8	5	5	3,4
+Crema/Nata 35% GRASA	35	40,8	752	4,7	4,7	1,1
+Agua	0	0	0	0	0	0
+Sacarosa	0	100	100	100	0	0
+Dextrosa	0	100	80	173	0	0
+Lactosa	0	100	16	100	100	0
+Maltodextrina 12DE	0	100	15	23	0	0
+Maltodextrina 18DE	0	100	5	34	0	0
+Glucosa 33DE	0	100	24	56	0	0
+Glucosa 38DE	0	100	29	68	0	0
+Glucosa 40DE	0	40	45	108	0	0
+Glucosa 60DE	0	40	57	114	0	0
+Azúcar invertida	0	72	120	190	0	0
+Fructosa	0	100	144	188	0	0
+Trehalosa	0	100	45	100	0	0
+Base 50 generica	13	100	21,5	55	13,77	9,8
+Pasta Avellana	60	100	0	-91	0	15
+Pasta Mani 	50	100	0	-70		26
+Pasta Pistacho	50	100	0	-70		20
+Macarpone	40	49	0,7	4,4	4,4	4
+Yema de huevo	30	50	0	0	0	15,8
+Base Amarilla	7,43	36,39	16,42	28,03	4,2	4,75
+Base Blanca						
+Almíbar Sorbete	0	44,4	30,73	40,42	0	0
+Chocolate Callebaut 54%	36,6	100	43	-21,26	0	5,1
+Chocolate Blanco	40	100	40	13		5
+Chocolate Callebaut 70%	39	100	26	-64,9	0	8,8
+Cacao 	22	100	0	-160,2	0	4
+Marsala	0	4,5	0	97	0	0
+Ron	0	0	0	232	0	0
+Vodka	0	0	0	232	0	0
+Whiskey	0	40	0	232	0	0
+Cerveza negra Guiness	0	7,8	3,6	24,3	0	0
+Crema de Coco	18,2	20,34	3,6	5	0	0,9
+Plátano	0	20	28,8	37,6	0	0
+Limón	0	5	7,2	9,4	0	0
+Mango	0	10	14,4	18,8	0	0
+Frambuesa	0	8	11,52	15,04	0	0
+Frutilla	0	8	11,52	15,04	0	0
+Sandía	0	6	8,64	11,28	0	0
+Melón	0	8	11,52	15,04	0	0
+Manzana	0	12	17,28	22,56	0	0
+Piña	0	13	18,72	24,44	0	0
+Durazno	0	11	15,84	20,68	0	0
+Damasco	0	12	17,28	22,56	0	0
+Mora	0	12	17,28	22,56	0	0
+Uva	0	16	23,04	30,08	0	0
+0	0	0	0	0	0	0
+LPD	0	100	8,32	52	52	34
+Neutro 5		100				
+Inulina	0	96	0	5	0	0
+Café en grano	0	100	0	0	0	0
+Coco rallado	64	100	2,8	4,24	0	6,9
+Alulosa			80	190		
+												
+Leche Colun	3,1	10,8	0,73	4,6	4,6	3,1
+Leche condensada 	4,1	70,6				7,5
+						
+						
+						
+						
+						
+Sorbitol 	0	100	50	280	0	0
+Maltitol 	0	100	90	175	0	0
+Xilitol 	0	100	100	190	0	0
+Eritritol 	0	100	60	90	0	0
+Manitol 	0	100	50	130	0	0
+Isomalt 	0	100	55	130	0	0
+Polidextrosa 	0	100	10	100	0	0
+Oligofructosa	0	100	35	180	0	0
+						
+						
+Glicerina 	0	70	70	342	0	0
+Leche de almendra	2,1	8,1	10	10	0	5,2
+						
+Crema vegetal 	23,6	43	15	15	0	0
+						
+Aceite girasol 	100	100	0	0	0	0
+						
+BASE X 3000 turbo	10	100	23,24	41,69	5	6,6
+						
+						
+Queso azul 	28,74	52,43			0,3	21,4
+Sal	0	100	0	100	0	0
+Pasta Vainilla concentrada	0,38	75,4	47,13	79,38	0	0,15
+Aceite de oliva 	100	100	0	0	0	0
+Albahaca 	0	100	0	0	0	0
+Mozzarella	16	34	0	0	1	17
+						
+Ecuador 56%	38	100	43	-23,6	0	6
+Chocolate blanco 35%	41	100	52,31	27,61	8,2	5,7
+Cacao 22/24	23	100	0	-158,67	0	21
+						
+Ecuador 56%	38	100	44	-22,6	0	6
+						
+						
+						
+chocolate Abkkao	10,01	100	0	-170,99	0	0
+cajeta	3,5	60	54	66,4	2,6	3,4
