@@ -5,7 +5,54 @@ import unicodedata
 import os
 
 # ================= 1. CONFIGURACIÓN (Limpia) =================
-st.set_page_config(
+st.set_page_config
+st.markdown("""
+    <style>
+    /* 1. Fondo general y textos */
+    .stApp {
+        background-color: #ffffff;
+    }
+    h1, h2, h3 {
+        color: #2fb692 !important; /* Títulos en Verde Azulado */
+    }
+    
+    /* 2. Métricas y Tarjetas */
+    div[data-testid="stMetricValue"] {
+        color: #e643aa; /* Números en Rosa Palomo */
+        font-weight: 800 !important;
+    }
+    div[data-testid="metric-container"] {
+        background-color: #f0fdf4; /* Fondo muy sutil */
+        border-left: 5px solid #2fb692; /* Borde Verde */
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    /* 3. Botones y Selectores */
+    .stButton > button {
+        background-color: #e643aa !important;
+        color: white !important;
+        border-radius: 8px;
+        border: none;
+    }
+    .stSelectbox label, .stNumberInput label {
+        color: #2fb692 !important;
+        font-weight: bold;
+    }
+    
+    /* 4. Alertas Personalizadas */
+    .stAlert {
+        background-color: #afffb8; /* Fondo Menta para avisos */
+        color: #1a5c48; /* Texto oscuro para contraste */
+    }
+    
+    /* 5. Ajustes de la Tabla */
+    iframe[title="streamlit.data_editor"] {
+        border: 1px solid #8feeff !important;
+        border-radius: 8px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+(
     page_title="El Palomo · Formulador",
     page_icon="🍦",
     layout="wide",
