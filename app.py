@@ -118,21 +118,31 @@ if check_password():
 
     st.success("La app se ha cargado correctamente")
 
+    # ================= NAVEGACIÓN =================
+    tab_db, tab_formulacion, tab_resultados = st.tabs([
+        "📚 Base de ingredientes",
+        "🧪 Formulación",
+        "📊 Resultados"
+    ])
+
     # ================= BASE DE INGREDIENTES =================
+    with tab_db:
     st.markdown("## 📚 Base de ingredientes")
 
-    uploaded = st.file_uploader("Carga tu archivo de ingredientes (CSV)", type=["csv"])
+            uploaded = st.file_uploader("Carga tu archivo de ingredientes (CSV)", type=["csv"])("Carga tu archivo de ingredientes (CSV)", type=["csv"])
 
     if uploaded:
         db = pd.read_csv(uploaded)
         db = normalize_cols(db)
         st.success("Base de ingredientes cargada")
         st.dataframe(db, use_container_width=True)
-    else:
-        st.warning("Carga un CSV para usar la base de ingredientes")
+            else:
+            st.warning("Carga un CSV para usar la base de ingredientes")
+            db = None
         db = None
 
-    # ================= MODO RECETA =================
+        # ================= FORMULACIÓN =================
+    with tab_formulacion:
     st.markdown("## 🍨 Tipo de receta")
     tipo = st.radio(
         "Selecciona el tipo de formulación",
@@ -189,6 +199,8 @@ if check_password():
         pod_total, pac_total = calcular_pod_pac(df)
 
         st.markdown("---")
+            # ================= RESULTADOS =================
+    with tab_resultados:
         st.markdown("## 📊 Resultados")
         st.dataframe(df, use_container_width=True)
 
