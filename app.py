@@ -168,24 +168,18 @@ else:
             for i in range(int(num)):
                 c1, c2, c3, c4 = st.columns([3, 2, 1, 1])
 
-                                db = st.session_state.user_db
+                db = st.session_state.user_db
                 opciones = db["INGREDIENTE"].tolist()
 
                 nombre = c1.selectbox(
                     f"Ingrediente {i+1}",
                     opciones,
                     key=f"ing_{i}",
-                    index=0,
                 )
 
                 fila = db[db["INGREDIENTE"].str.lower() == nombre.lower()].iloc[0]
                 pod = float(fila.get("POD", 0))
                 pac = float(fila.get("PAC", 0))
-
-
-                    nombre = c1.text_input(f"Ingrediente {i+1}", key=f"ing_{i}")
-                    pod = c3.number_input("POD", 0.0, 200.0, 0.0, key=f"pod_{i}")
-                    pac = c4.number_input("PAC", 0.0, 300.0, 0.0, key=f"pac_{i}")
 
                 gramos = c2.number_input("Gramos", 0.0, 5000.0, 0.0, key=f"g_{i}")
                 c3.markdown(f"**{pod}**")
@@ -193,6 +187,11 @@ else:
 
                 if gramos > 0:
                     ingredientes.append({
+                        "INGREDIENTE": nombre,
+                        "GRAMOS": gramos,
+                        "POD": pod,
+                        "PAC": pac,
+                    })({
                         "INGREDIENTE": nombre,
                         "GRAMOS": gramos,
                         "POD": pod,
