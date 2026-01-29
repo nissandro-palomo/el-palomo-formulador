@@ -117,3 +117,64 @@ if check_password():
     st.info("🧠 Para novatos: POD = dulzor | PAC = control del frío")
 
     st.success("La app se ha cargado correctamente")
+
+    # ================= MODO RECETA =================
+    st.markdown("## 🍨 Tipo de receta")
+    tipo = st.radio(
+        "Selecciona el tipo de formulación",
+        ["Gelato", "Sorbete"],
+        horizontal=True
+    )
+
+    if tipo == "Gelato":
+        objetivo_pac = (220, 260)
+        objetivo_pod = (160, 200)
+        st.info("🎯 Objetivo Gelato: PAC 220–260 | POD 160–200")
+    else:
+        objetivo_pac = (260, 320)
+        objetivo_pod = (200, 260)
+        st.info("🎯 Objetivo Sorbete: PAC 260–320 | POD 200–260")
+
+    st.markdown("---")
+    st.markdown("## 🧪 Construcción de receta")
+
+    num = st.number_input("Cantidad de ingredientes", 1, 15, 4)
+    ingredientes = []
+
+    for i in range(int(num)):
+        cols = st.columns([3, 2, 1, 1])
+        nombre = cols[0].text_input(f"Ingrediente {i+1}", key=f"ing_{i}")
+        gramos = cols[1].number_input("Gramos", 0.0, 5000.0, 0.0, key=f"g_{i}")
+        pod = cols[2].number_input("POD", 0.0, 200.0, 0.0, key=f"pod_{i}")
+        pac = cols[3].number_input("PAC", 0.0, 300.0, 0.0, key=f"pac_{i}")
+
+        if gramos > 0:
+            ingredientes.append({
+                "INGREDIENTE": nombre,
+                "GRAMOS": gramos,
+                "POD": pod,
+                "PAC": pac
+            })
+
+    if ingredientes:
+        df = pd.DataFrame(ingredientes)
+        pod_total, pac_total = calcular_pod_pac(df)
+
+        st.markdown("---")
+        st.markdown("## 📊 Resultados")
+        st.dataframe(df, use_container_width=True)
+
+        c1, c2 = st.columns(2)
+        c1.metric("POD total", f"{pod_total:.1f}")
+        c2.metric("PAC total", f"{pac_total:.1f}")
+
+        if not (objetivo_pod[0] <= pod_total <= objetivo_pod[1]):
+            st.warning(f"⚠️ POD fuera de rango ({objetivo_pod[0]}–{objetivo_pod[1]})")
+        else:
+            st.success("✅ POD en rango correcto")
+
+        if not (objetivo_pac[0] <= pac_total <= objetivo_pac[1]):
+            st.warning(f"⚠️ PAC fuera de rango ({objetivo_pac[0]}–{objetivo_pac[1]})")
+            st.info(recomendacion_pac(pac_total, objetivo_pac[0]))
+        else:
+            st.success("✅ PAC en rango correcto")
