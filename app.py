@@ -12,61 +12,110 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-st.markdown("""
-    <style>
-    /* 1. Fondo general y textos */
-    .stApp {
-        background-color: #ffffff;
-    }
-    h1, h2, h3 {
-        color: #2fb692 !important; /* Títulos en Verde Azulado */
-    }
-    
-    /* 2. Métricas y Tarjetas */
-    div[data-testid="stMetricValue"] {
-        color: #e643aa; /* Números en Rosa Palomo */
-        font-weight: 800 !important;
-    }
-    div[data-testid="metric-container"] {
-        background-color: #f0fdf4; /* Fondo muy sutil */
-        border-left: 5px solid #2fb692; /* Borde Verde */
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-    }
-    
-    /* 3. Botones y Selectores */
-    .stButton > button {
-        background-color: #e643aa !important;
-        color: white !important;
-        border-radius: 8px;
-        border: none;
-    }
-    .stSelectbox label, .stNumberInput label {
-        color: #2fb692 !important;
-        font-weight: bold;
-    }
-    
-    /* 4. Alertas Personalizadas */
-    .stAlert {
-        background-color: #afffb8; /* Fondo Menta para avisos */
-        color: #1a5c48; /* Texto oscuro para contraste */
-    }
-    
-    /* 5. Ajustes de la Tabla */
-    iframe[title="streamlit.data_editor"] {
-        border: 1px solid #8feeff !important;
-        border-radius: 8px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# Tema y CSS global para aplicar la paleta a TODOS los elementos
+PRIMARY = "#2fb692"    # Verde Azulado - titulos, bordes
+ACCENT = "#e643aa"     # Rosa Palomo - botones, métricas
+BG = "#f7fffb"         # Fondo suave menta
+CARD_BG = "#ffffff"    # Fondo de contenedores (blanco para contraste)
+TEXT = "#123e2f"       # Texto primario oscuro
+MUTED = "#6b776f"      # Texto secundario
+BORDER = "#d9f6ea"
 
-# CSS MÍNIMO (Solo para ajustar espacios, sin tocar colores)
-st.markdown("""
+st.markdown(f"""
     <style>
-    /* Reducir espacio superior excesivo */
-    .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
-    
-    /* Ajuste para que las métricas se vean más compactas */
-    [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+    /* Global */
+    html, body, .stApp, .block-container {{
+        background: {BG} !important;
+        color: {TEXT} !important;
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }}
+
+    /* Headers */
+    h1, h2, h3, .css-1v3fvcr h1, .css-1v3fvcr h2, .css-1v3fvcr h3 {{
+        color: {PRIMARY} !important;
+        font-weight: 700;
+    }}
+
+    /* Metrics */
+    div[data-testid="stMetricValue"] {{
+        color: {ACCENT} !important;
+        font-weight: 800 !important;
+    }}
+div[data-testid="metric-container"] {{
+        background-color: {CARD_BG} !important;
+        border-left: 4px solid {PRIMARY} !important;
+        box-shadow: 0 2px 6px rgba(18,62,47,0.06);
+        padding: 0.75rem 1rem !important;
+        border-radius: 10px;
+    }}
+
+    /* Buttons */
+    .stButton > button, .css-1hsw967 {{
+        background-color: {ACCENT} !important;
+        color: white !important;
+        border-radius: 8px !important;
+        border: none !important;
+        box-shadow: none !important;
+    }}
+
+    /* Inputs and Selects */
+    .stSelectbox label, .stNumberInput label, label {{
+        color: {PRIMARY} !important;
+        font-weight: 700 !important;
+    }}
+    .stTextInput>div>input, .stNumberInput>div>input, textarea {{
+        background: {CARD_BG} !important;
+        color: {TEXT} !important;
+        border: 1px solid {BORDER} !important;
+        border-radius: 8px !important;
+    }}
+
+    /* Sidebar */
+    .css-1d391kg .css-1v3fvcr, .css-1d391kg .css-1v3fvcr .css-1outpf7 {{
+        background: linear-gradient(180deg, {BG}, {CARD_BG}) !important;
+        color: {TEXT} !important;
+    }}
+
+    /* Data editor / tablas */
+    iframe[title="streamlit.data_editor"], .stDataFrame, .css-1cpxqw2 {{
+        background: {CARD_BG} !important;
+        border: 1px solid {BORDER} !important;
+        border-radius: 8px !important;
+        color: {TEXT} !important;
+    }}
+
+    /* Expander */
+    .stExpander, .stExpander .stButton {{
+        background: transparent !important;
+        color: {TEXT} !important;
+    }}
+
+    /* Alerts and captions */
+    .stAlert {{
+        background-color: #eaffef !important;
+        color: {TEXT} !important;
+        border: 1px solid {BORDER} !important;
+    }}
+    .stCaption, .stMarkdown p, .stMarkdown span {{
+        color: {MUTED} !important;
+    }}
+
+    /* Links */
+    a, a:link, a:visited {{
+        color: {PRIMARY} !important;
+    }}
+
+    /* Code blocks */
+    pre, code {{
+        background: #f3f6f3 !important;
+        color: {TEXT} !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.5rem !important;
+    }}
+
+    /* Reduce excessive spacing */
+    .block-container {{ padding-top: 1.0rem; padding-bottom: 0.75rem; }}
+    [data-testid="stMetricValue"] {{ font-size: 1.4rem !important; }}
     </style>
 """, unsafe_allow_html=True)
 
