@@ -18,6 +18,17 @@ import unicodedata
 from datetime import datetime
 
 # ================= UTILIDADES COMUNES =================
+
+def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
+    df.columns = (
+        df.columns
+        .str.strip()
+        .str.upper()
+        .map(lambda c: unicodedata.normalize("NFKD", c).encode("ascii", "ignore").decode("utf-8"))
+    )
+    return df
+
+
 DEFAULT_DB = pd.DataFrame([
     {"INGREDIENTE": "Leche", "POD": 0, "PAC": 0},
     {"INGREDIENTE": "Azúcar", "POD": 100, "PAC": 190},
@@ -27,7 +38,8 @@ DEFAULT_DB = pd.DataFrame([
 
 DEFAULT_DB = normalize_cols(DEFAULT_DB)
 
-def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
+
+def calcular_pod_pac(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = (
         df.columns
         .str.strip()
@@ -187,11 +199,6 @@ else:
 
                 if gramos > 0:
                     ingredientes.append({
-                        "INGREDIENTE": nombre,
-                        "GRAMOS": gramos,
-                        "POD": pod,
-                        "PAC": pac,
-                    })({
                         "INGREDIENTE": nombre,
                         "GRAMOS": gramos,
                         "POD": pod,
