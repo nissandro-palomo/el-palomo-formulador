@@ -18,6 +18,15 @@ import unicodedata
 from datetime import datetime
 
 # ================= UTILIDADES COMUNES =================
+DEFAULT_DB = pd.DataFrame([
+    {"INGREDIENTE": "Leche", "POD": 0, "PAC": 0},
+    {"INGREDIENTE": "Azúcar", "POD": 100, "PAC": 190},
+    {"INGREDIENTE": "Dextrosa", "POD": 75, "PAC": 190},
+    {"INGREDIENTE": "Crema", "POD": 0, "PAC": 0},
+])
+
+DEFAULT_DB = normalize_cols(DEFAULT_DB)
+
 def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = (
         df.columns
@@ -113,16 +122,34 @@ else:
         # ================= BASE DE INGREDIENTES =================
         with tab_db:
             st.markdown("## 📚 Base de ingredientes")
-            uploaded = st.file_uploader("Carga tu CSV de ingredientes", type=["csv"])
 
-            if uploaded:
-                db = normalize_cols(pd.read_csv(uploaded))
-                st.dataframe(db, use_container_width=True)
-            else:
-                db = None
-                st.warning("Carga un CSV para habilitar la base")
+            if "user_db" not in st.session_state:
+                st.session_state.user_db = DEFAULT_DB.copy()
+
+            st.dataframe(st.session_state.user_db, use_container_width=True)
+
+            st.markdown("### ➕ Agregar nuevo ingrediente (sin modificar base principal)")
+            with st.form("add_ing"):
+                n = st.text_input("Nombre ingrediente")
+                pod = st.number_input("POD", 0.0, 300.0, 0.0)
+                pac = st.number_input("PAC", 0.0, 300.0, 0.0)
+                ok = st.form_submit_button("Agregar")
+
+                if ok and n:
+                    nuevo = pd.DataFrame([{
+                        "INGREDIENTE": n.strip(),
+                        "POD": pod,
+                        "PAC": pac,
+                    }])
+                    nuevo = normalize_cols(nuevo)
+                    st.session_state.user_db = pd.concat([
+                        st.session_state.user_db,
+                        nuevo
+                    ], ignore_index=True)
+                    st.success(f"Ingrediente '{n}' agregado")
 
         # ================= FORMULACIÓN =================
+
         with tab_form:
             st.markdown("## 🍨 Tipo de receta")
             tipo = st.radio("Selecciona el tipo", ["Gelato", "Sorbete"], horizontal=True)
@@ -141,12 +168,21 @@ else:
             for i in range(int(num)):
                 c1, c2, c3, c4 = st.columns([3, 2, 1, 1])
 
-                if db is not None:
-                    nombre = c1.selectbox(f"Ingrediente {i+1}", db.iloc[:, 0].unique(), key=f"ing_{i}")
-                    fila = db[db.iloc[:, 0] == nombre].iloc[0]
-                    pod = float(fila.get("POD", 0))
-                    pac = float(fila.get("PAC", 0))
-                else:
+                                db = st.session_state.user_db
+                opciones = db["INGREDIENTE"].tolist()
+
+                nombre = c1.selectbox(
+                    f"Ingrediente {i+1}",
+                    opciones,
+                    key=f"ing_{i}",
+                    index=0,
+                )
+
+                fila = db[db["INGREDIENTE"].str.lower() == nombre.lower()].iloc[0]
+                pod = float(fila.get("POD", 0))
+                pac = float(fila.get("PAC", 0))
+
+
                     nombre = c1.text_input(f"Ingrediente {i+1}", key=f"ing_{i}")
                     pod = c3.number_input("POD", 0.0, 200.0, 0.0, key=f"pod_{i}")
                     pac = c4.number_input("PAC", 0.0, 300.0, 0.0, key=f"pac_{i}")
