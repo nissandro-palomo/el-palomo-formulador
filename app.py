@@ -4,71 +4,28 @@ import numpy as np
 import unicodedata
 import os
 
+# Carga de estilos externos (styles.css)
+def load_styles():
+    css_path = "styles.css"
+    if os.path.exists(css_path):
+        try:
+            with open(css_path, "r", encoding="utf-8") as f:
+                st.markdown(f"<style>{{f.read()}}</style>", unsafe_allow_html=True)
+        except Exception as e:
+            st.warning(f"No se pudo cargar styles.css: {{e}}");
+    else:
+        st.info("styles.css no encontrado — se usan estilos por defecto.")
+
 # ================= 1. CONFIGURACIÓN (Limpia) =================
-st.set_page_config
-st.markdown("""
-    <style>
-    /* 1. Fondo general y textos */
-    .stApp {
-        background-color: #ffffff;
-    }
-    h1, h2, h3 {
-        color: #2fb692 !important; /* Títulos en Verde Azulado */
-    }
-    
-    /* 2. Métricas y Tarjetas */
-    div[data-testid="stMetricValue"] {
-        color: #e643aa; /* Números en Rosa Palomo */
-        font-weight: 800 !important;
-    }
-    div[data-testid="metric-container"] {
-        background-color: #f0fdf4; /* Fondo muy sutil */
-        border-left: 5px solid #2fb692; /* Borde Verde */
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-    }
-    
-    /* 3. Botones y Selectores */
-    .stButton > button {
-        background-color: #e643aa !important;
-        color: white !important;
-        border-radius: 8px;
-        border: none;
-    }
-    .stSelectbox label, .stNumberInput label {
-        color: #2fb692 !important;
-        font-weight: bold;
-    }
-    
-    /* 4. Alertas Personalizadas */
-    .stAlert {
-        background-color: #afffb8; /* Fondo Menta para avisos */
-        color: #1a5c48; /* Texto oscuro para contraste */
-    }
-    
-    /* 5. Ajustes de la Tabla */
-    iframe[title="streamlit.data_editor"] {
-        border: 1px solid #8feeff !important;
-        border-radius: 8px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-(
+st.set_page_config(
     page_title="El Palomo · Formulador",
     page_icon="🍦",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# CSS MÍNIMO (Solo para ajustar espacios, sin tocar colores)
-st.markdown("""
-    <style>
-    /* Reducir espacio superior excesivo */
-    .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
-    
-    /* Ajuste para que las métricas se vean más compactas */
-    [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
-    </style>
-""", unsafe_allow_html=True)
+# Cargar estilos externos (separado)
+load_styles()
 
 class GelatoEngine:
     """Motor de cálculo aislado."""
@@ -236,10 +193,10 @@ def main():
                 delta_color = "off" # Gris por defecto
                 
                 if val < mn: 
-                    delta_val = f"Bajo ({mn}-{mx})"
+                    delta_val = f"Bajo ({{mn}}-{{mx}})"
                     delta_color = "inverse" # Rojo
                 elif val > mx:
-                    delta_val = f"Alto ({mn}-{mx})"
+                    delta_val = f"Alto ({{mn}}-{{mx}})"
                     delta_color = "inverse" # Rojo
                 else:
                     delta_val = "✅ En rango"
@@ -247,7 +204,7 @@ def main():
                 
                 if "Custom" in tipo: delta_val = None
 
-                st.metric(label, f"{val:.1f}{suffix}", delta=delta_val, delta_color=delta_color)
+                st.metric(label, f"{{val:.1f}}{suffix}", delta=delta_val, delta_color=delta_color)
 
             # Fila 1: POD / PAC (Lo más importante)
             c1, c2 = st.columns(2)
@@ -262,15 +219,15 @@ def main():
             # Fila 3: Secundarios (En contenedor gris o transparente)
             with st.expander("Ver detalles (Proteína / Lactosa)", expanded=True):
                 c5, c6 = st.columns(2)
-                c5.metric("Proteína", f"{res.get('PROTEINA',0):.1f}%")
-                c6.metric("Lactosa", f"{res.get('LACTOSA',0):.1f}%")
+                c5.metric("Proteína", f"{{res.get('PROTEINA',0):.1f}}%")
+                c6.metric("Lactosa", f"{{res.get('LACTOSA',0):.1f}}%")
                 
             # --- CONSEJOS ---
             pac_actual = res.get('PAC', 0)
             if pac_actual < lims['PAC'][0]:
                 falta = lims['PAC'][0] - pac_actual
                 dex = falta * 1000 / 190
-                st.warning(f"🧊 **Falta PAC:** El helado estará duro. Agrega aprox. **{dex:.0f}g** de Dextrosa.")
+                st.warning(f"🧊 **Falta PAC:** El helado estará duro. Agrega aprox. **{{dex:.0f}}g** de Dextrosa.")
 
         else:
             st.info("👈 Agrega ingredientes en la tabla para calcular.")
