@@ -118,6 +118,20 @@ if check_password():
 
     st.success("La app se ha cargado correctamente")
 
+    # ================= BASE DE INGREDIENTES =================
+    st.markdown("## 📚 Base de ingredientes")
+
+    uploaded = st.file_uploader("Carga tu archivo de ingredientes (CSV)", type=["csv"])
+
+    if uploaded:
+        db = pd.read_csv(uploaded)
+        db = normalize_cols(db)
+        st.success("Base de ingredientes cargada")
+        st.dataframe(db, use_container_width=True)
+    else:
+        st.warning("Carga un CSV para usar la base de ingredientes")
+        db = None
+
     # ================= MODO RECETA =================
     st.markdown("## 🍨 Tipo de receta")
     tipo = st.radio(
@@ -143,10 +157,24 @@ if check_password():
 
     for i in range(int(num)):
         cols = st.columns([3, 2, 1, 1])
-        nombre = cols[0].text_input(f"Ingrediente {i+1}", key=f"ing_{i}")
+        if db is not None:
+            nombre = cols[0].selectbox(
+                f"Ingrediente {i+1}",
+                db[db.columns[0]].unique(),
+                key=f"ing_{i}"
+            )
+            fila = db[db[db.columns[0]] == nombre].iloc[0]
+            pod = fila.get("POD", 0.0)
+            pac = fila.get("PAC", 0.0)
+        else:
+            nombre = cols[0].text_input(f"Ingrediente {i+1}", key=f"ing_{i}")
+            pod = cols[2].number_input("POD", 0.0, 200.0, 0.0, key=f"pod_{i}")
+            pac = cols[3].number_input("PAC", 0.0, 300.0, 0.0, key=f"pac_{i}")
+
         gramos = cols[1].number_input("Gramos", 0.0, 5000.0, 0.0, key=f"g_{i}")
-        pod = cols[2].number_input("POD", 0.0, 200.0, 0.0, key=f"pod_{i}")
-        pac = cols[3].number_input("PAC", 0.0, 300.0, 0.0, key=f"pac_{i}")
+
+        cols[2].markdown(f"**{pod}**")
+        cols[3].markdown(f"**{pac}**")
 
         if gramos > 0:
             ingredientes.append({
