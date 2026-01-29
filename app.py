@@ -1,230 +1,220 @@
-"""
-El Palomo · Formulador Profesional
-
-App dual:
-- Si Streamlit está disponible → interfaz gráfica
-- Si NO está disponible → modo consola para pruebas y debug
-"""
-
-# ================= PRE-CHECK DE ENTORNO =================
-STREAMLIT_AVAILABLE = True
-try:
-    import streamlit as st
-except ModuleNotFoundError:
-    STREAMLIT_AVAILABLE = False
-
+import streamlit as st
 import pandas as pd
 import unicodedata
-from datetime import datetime
+import os
+from typing import Optional, Tuple, Dict
 
-# ================= UTILIDADES COMUNES =================
+# ================= 1. CONFIGURACIÓN =================
+st.set_page_config(
+    page_title="El Palomo · Formulador",
+    page_icon="🍦",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
-    df.columns = (
-        df.columns
-        .str.strip()
-        .str.upper()
-        .map(lambda c: unicodedata.normalize("NFKD", c).encode("ascii", "ignore").decode("utf-8"))
-    )
-    return df
+st.markdown(
+    """
+    <style>
+    .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
+    [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
+class GelatoEngine:
+    """Motor de cálculo y utilidades para normalizar y mezclar ingredientes."""
 
-DEFAULT_DB = pd.DataFrame([
-    {"INGREDIENTE": "Leche", "POD": 0, "PAC": 0},
-    {"INGREDIENTE": "Azúcar", "POD": 100, "PAC": 190},
-    {"INGREDIENTE": "Dextrosa", "POD": 75, "PAC": 190},
-    {"INGREDIENTE": "Crema", "POD": 0, "PAC": 0},
-])
-
-DEFAULT_DB = normalize_cols(DEFAULT_DB)
-
-
-def calcular_pod_pac(df: pd.DataFrame) -> pd.DataFrame:
-    df.columns = (
-        df.columns
-        .str.strip()
-        .str.upper()
-        .map(lambda c: unicodedata.normalize("NFKD", c).encode("ascii", "ignore").decode("utf-8"))
-    )
-    return df
-
-
-def calcular_pod_pac(df: pd.DataFrame):
-    pod = (df["GRAMOS"] * df["POD"] / 100).sum()
-    pac = (df["GRAMOS"] * df["PAC"] / 100).sum()
-    return pod, pac
-
-
-def recomendacion_pac(pac_total, objetivo_min=240):
-    if pac_total < objetivo_min:
-        delta = objetivo_min - pac_total
-        gramos_dextrosa = delta * 1000 / 190
-        return f"Para corregir este PAC, agrega ~{gramos_dextrosa:.0f} g de dextrosa"
-    return "PAC dentro de rango recomendado"
-
-# ================= MODO CONSOLA =================
-if not STREAMLIT_AVAILABLE:
-    print("⚠️ Streamlit no está disponible en este entorno")
-    print("La app se ejecuta en MODO CONSOLA para pruebas")
-    print("Para UI gráfica ejecutar localmente con:\n  streamlit run app.py")
-
-    receta_demo = {
-        "INGREDIENTE": ["Leche", "Azúcar", "Dextrosa", "Crema"],
-        "GRAMOS": [600, 120, 40, 80],
-        "POD": [0, 100, 75, 0],
-        "PAC": [0, 190, 190, 0],
+    COL_MAP = {
+        "INGREDIENTES": "INGREDIENTE",
+        "PORCENTAJE GRASO": "GRASA",
+        "SÓLIDOS TOTALES": "SOLIDOS",
+        "SOLIDOS TOTALES": "SOLIDOS",
+        "P.O.D": "POD",
+        "P.A.C": "PAC",
+        "LACTOSA": "LACTOSA",
+        "PROTEÍNA": "PROTEINA",
+        "PROTEINA": "PROTEINA",
     }
 
-    df = pd.DataFrame(receta_demo)
-    print("\n📊 Receta demo")
-    print(df)
+    @staticmethod
+    def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
+        cols = []
+        for c in df.columns:
+            if not isinstance(c, str):
+                c = str(c)
+            c_norm = unicodedata.normalize("NFKD", c.strip()).encode("ascii", "ignore").decode("utf-8").upper()
+            cols.append(c_norm)
+        df = df.copy()
+        df.columns = cols
+        rename_map = {k: v for k, v in GelatoEngine.COL_MAP.items() if k in df.columns}
+        df = df.rename(columns=rename_map)
+        return df
 
-    pod_total, pac_total = calcular_pod_pac(df)
-    print(f"POD total: {pod_total:.1f}")
-    print(f"PAC total: {pac_total:.1f}")
-    print(recomendacion_pac(pac_total))
+    @staticmethod
+    def calculate_mix(receta_df: pd.DataFrame, db_df: pd.DataFrame) -> Tuple[Dict[str, float], float]:
+        if receta_df is None or receta_df.empty or db_df is None or db_df.empty:
+            return {}, 0.0
+        if "INGREDIENTE" not in receta_df.columns or "GRAMOS" not in receta_df.columns:
+            return {}, 0.0
 
-    # ================= TESTS =================
-    def test_calculo():
-        p, a = calcular_pod_pac(df)
-        assert p > 0
-        assert a > 0
+        merged = receta_df.merge(db_df, on="INGREDIENTE", how="left")
+        for col in ["GRASA", "SOLIDOS", "POD", "PAC", "LACTOSA", "PROTEINA"]:
+            if col not in merged.columns:
+                merged[col] = 0.0
 
-    def test_normalize():
-        dft = pd.DataFrame({"Grása ": [1], "POD": [100]})
-        out = normalize_cols(dft)
-        assert "GRASA" in out.columns
+        merged["GRAMOS"] = pd.to_numeric(merged["GRAMOS"], errors="coerce").fillna(0.0)
+        total_peso = float(merged["GRAMOS"].sum())
+        if total_peso <= 0:
+            return {}, 0.0
 
-    test_calculo()
-    test_normalize()
-    print("✔️ Tests OK – Fin modo consola")
+        metrics: Dict[str, float] = {}
+        targets = ["GRASA", "SOLIDOS", "POD", "PAC", "LACTOSA", "PROTEINA"]
 
-else:
-    # ================= STREAMLIT APP =================
-    st.set_page_config(page_title="El Palomo · Formulador Profesional", layout="wide")
-    PASSWORD = "Palomo2026"
-
-    # ================= SEGURIDAD =================
-    def check_password():
-        def password_entered():
-            st.session_state["password_ok"] = st.session_state.get("password") == PASSWORD
-            st.session_state.pop("password", None)
-
-        if "password_ok" not in st.session_state:
-            st.text_input("🔐 Clave El Palomo", type="password", on_change=password_entered, key="password")
-            return False
-
-        if not st.session_state.get("password_ok", False):
-            st.error("Acceso denegado")
-            return False
-
-        return True
-
-    # ================= APP =================
-    if check_password():
-        st.title("🍦 El Palomo · Formulador de Gelato & Sorbete")
-        st.info("🧠 Para novatos: POD = dulzor | PAC = control del frío")
-
-        tab_db, tab_form, tab_res = st.tabs([
-            "📚 Ingredientes",
-            "🧪 Formulación",
-            "📊 Resultados"
-        ])
-
-        # ================= BASE DE INGREDIENTES =================
-        with tab_db:
-            st.markdown("## 📚 Base de ingredientes")
-
-            if "user_db" not in st.session_state:
-                st.session_state.user_db = DEFAULT_DB.copy()
-
-            st.dataframe(st.session_state.user_db, use_container_width=True)
-
-            st.markdown("### ➕ Agregar nuevo ingrediente (sin modificar base principal)")
-            with st.form("add_ing"):
-                n = st.text_input("Nombre ingrediente")
-                pod = st.number_input("POD", 0.0, 300.0, 0.0)
-                pac = st.number_input("PAC", 0.0, 300.0, 0.0)
-                ok = st.form_submit_button("Agregar")
-
-                if ok and n:
-                    nuevo = pd.DataFrame([{
-                        "INGREDIENTE": n.strip(),
-                        "POD": pod,
-                        "PAC": pac,
-                    }])
-                    nuevo = normalize_cols(nuevo)
-                    st.session_state.user_db = pd.concat([
-                        st.session_state.user_db,
-                        nuevo
-                    ], ignore_index=True)
-                    st.success(f"Ingrediente '{n}' agregado")
-
-        # ================= FORMULACIÓN =================
-
-        with tab_form:
-            st.markdown("## 🍨 Tipo de receta")
-            tipo = st.radio("Selecciona el tipo", ["Gelato", "Sorbete"], horizontal=True)
-
-            if tipo == "Gelato":
-                objetivo_pac = (220, 260)
-                objetivo_pod = (160, 200)
+        for t in targets:
+            aporte_total = (merged["GRAMOS"] * merged[t] / 100.0).sum()
+            if t in ("POD", "PAC"):
+                metrics[t] = float(aporte_total * (1000.0 / total_peso))
             else:
-                objetivo_pac = (260, 320)
-                objetivo_pod = (200, 260)
+                metrics[t] = float((aporte_total / total_peso) * 100.0)
 
-            st.markdown("## 🧪 Construcción de receta")
-            num = st.number_input("Cantidad de ingredientes", 1, 15, 4)
-            ingredientes = []
+        return metrics, total_peso
 
-            for i in range(int(num)):
-                c1, c2, c3, c4 = st.columns([3, 2, 1, 1])
+def load_database(filename: str = "Ingredientes.csv") -> Optional[pd.DataFrame]:
+    if not os.path.exists(filename):
+        return None
+    try:
+        df = pd.read_csv(filename, encoding="utf-8")
+    except UnicodeDecodeError:
+        try:
+            df = pd.read_csv(filename, encoding="latin-1")
+        except Exception as e:
+            st.error(f"Error leyendo {filename}: {e}")
+            return None
+    except Exception as e:
+        st.error(f"Error leyendo {filename}: {e}")
+        return None
 
-                db = st.session_state.user_db
-                opciones = db["INGREDIENTE"].tolist()
+    df = GelatoEngine.normalize_cols(df)
+    if "INGREDIENTE" not in df.columns:
+        st.warning("El CSV cargado no contiene columna 'INGREDIENTE' normalizada.")
+    return df
 
-                nombre = c1.selectbox(
-                    f"Ingrediente {i+1}",
-                    opciones,
-                    key=f"ing_{i}",
-                )
+def main():
+    c1, c2 = st.columns([0.5, 9])
+    with c1:
+        if os.path.exists("logo.png"):
+            st.image("logo.png", width=50)
+        else:
+            st.title("🍦")
+    with c2:
+        st.subheader("El Palomo · Formulador Profesional")
 
-                fila = db[db["INGREDIENTE"].str.lower() == nombre.lower()].iloc[0]
-                pod = float(fila.get("POD", 0))
-                pac = float(fila.get("PAC", 0))
+    db = load_database()
+    if db is None:
+        st.warning("⚠️ No encuentro 'Ingredientes.csv' en el directorio actual.")
+        uploaded = st.file_uploader("Sube tu archivo de ingredientes (CSV)", type=["csv"])
+        if uploaded:
+            try:
+                db = GelatoEngine.normalize_cols(pd.read_csv(uploaded))
+            except Exception as e:
+                st.error(f"Error leyendo el archivo subido: {e}")
+                st.stop()
+        else:
+            st.stop()
 
-                gramos = c2.number_input("Gramos", 0.0, 5000.0, 0.0, key=f"g_{i}")
-                c3.markdown(f"**{pod}**")
-                c4.markdown(f"**{pac}**")
+    lista_ingredientes = []
+    if "INGREDIENTE" in db.columns:
+        lista_ingredientes = sorted(db["INGREDIENTE"].dropna().astype(str).unique().tolist())
 
-                if gramos > 0:
-                    ingredientes.append({
-                        "INGREDIENTE": nombre,
-                        "GRAMOS": gramos,
-                        "POD": pod,
-                        "PAC": pac,
-                    })
+    col_editor, col_results = st.columns([1.5, 1], gap="large")
 
-        # ================= RESULTADOS =================
-        with tab_res:
-            if ingredientes:
-                df = pd.DataFrame(ingredientes)
-                pod_total, pac_total = calcular_pod_pac(df)
+    with col_editor:
+        st.info("📝 Composición de la Receta")
+        if "receta" not in st.session_state:
+            st.session_state.receta = pd.DataFrame({"INGREDIENTE": ["" for _ in range(8)], "GRAMOS": [0.0 for _ in range(8)]})
 
-                st.dataframe(df, use_container_width=True)
-                c1, c2 = st.columns(2)
-                c1.metric("POD total", f"{pod_total:.1f}")
-                c2.metric("PAC total", f"{pac_total:.1f}")
+        edited_df = st.data_editor(
+            st.session_state.receta,
+            column_config={
+                "INGREDIENTE": st.column_config.SelectboxColumn("Ingrediente", options=lista_ingredientes, required=False),
+                "GRAMOS": st.column_config.NumberColumn("Gramos", min_value=0.0, max_value=100000.0, step=1.0, format="%d g"),
+            },
+            num_rows="dynamic",
+            use_container_width=True,
+            hide_index=True,
+            height=450,
+        )
 
-                if not (objetivo_pod[0] <= pod_total <= objetivo_pod[1]):
-                    st.warning(f"POD fuera de rango {objetivo_pod}")
-                else:
-                    st.success("POD correcto")
+        st.session_state.receta = edited_df
+        receta_clean = (edited_df.dropna(subset=["INGREDIENTE"]).loc[lambda df: df["INGREDIENTE"].astype(str).str.strip() != ""]) 
+        receta_clean["GRAMOS"] = pd.to_numeric(receta_clean["GRAMOS"], errors="coerce").fillna(0.0)
+        receta_clean = receta_clean[receta_clean["GRAMOS"] > 0].copy()
+        if not receta_clean.empty:
+            receta_clean = receta_clean.groupby("INGREDIENTE", as_index=False)["GRAMOS"].sum()
 
-                if not (objetivo_pac[0] <= pac_total <= objetivo_pac[1]):
-                    st.warning(f"PAC fuera de rango {objetivo_pac}")
-                    st.info(recomendacion_pac(pac_total, objetivo_pac[0]))
-                else:
-                    st.success("PAC correcto")
+    with col_results:
+        res, peso = GelatoEngine.calculate_mix(receta_clean, db)
+        st.markdown("### ⚖️ Peso Total")
+        st.metric("Gramos", f"{peso:.0f} g")
+
+        if peso > 0 and (peso < 990 or peso > 1010):
+            st.caption("⚠️ Ajusta a 1000g para mayor precisión")
+
+        if peso <= 0:
+            st.info("👈 Agrega ingredientes en la tabla para calcular.")
+            return
+
+        st.write("---")
+        tipo = st.radio("Objetivo:", ["Gelato 🥛", "Sorbete 🍧", "Custom ⚙️"], horizontal=True)
+
+        if "Gelato" in tipo:
+            lims = {"POD": (170, 200), "PAC": (240, 270), "GRASA": (6, 10), "SOLIDOS": (36, 42)}
+        elif "Sorbete" in tipo:
+            lims = {"POD": (200, 240), "PAC": (280, 320), "GRASA": (0, 0.5), "SOLIDOS": (28, 34)}
+        else:
+            lims = {"POD": (0, 999), "PAC": (0, 999), "GRASA": (0, 100), "SOLIDOS": (0, 100)}
+
+        def mostrar_metric(label: str, key: str, suffix: str = ""):
+            val = res.get(key, 0.0)
+            mn, mx = lims.get(key, (0.0, 0.0))
+            if "Custom" in tipo:
+                delta = None
+                delta_color = "normal"
             else:
-                st.info("Agrega ingredientes para ver resultados")
+                if val < mn:
+                    delta = f"Bajo ({mn}-{mx})"
+                    delta_color = "inverse"
+                elif val > mx:
+                    delta = f"Alto ({mn}-{mx})"
+                    delta_color = "inverse"
+                else:
+                    delta = "✅ En rango"
+                    delta_color = "normal"
+            st.metric(label, f"{val:.1f}{suffix}", delta=delta, delta_color=delta_color)
+
+        c1, c2 = st.columns(2)
+        with c1:
+            mostrar_metric("POD (Dulzor)", "POD")
+        with c2:
+            mostrar_metric("PAC (Frío)", "PAC")
+
+        c3, c4 = st.columns(2)
+        with c3:
+            mostrar_metric("Grasa", "GRASA", "%")
+        with c4:
+            mostrar_metric("Sólidos Tot.", "SOLIDOS", "%")
+
+        with st.expander("Ver detalles (Proteína / Lactosa)", expanded=True):
+            c5, c6 = st.columns(2)
+            c5.metric("Proteína", f"{res.get('PROTEINA', 0.0):.1f}%")
+            c6.metric("Lactosa", f"{res.get('LACTOSA', 0.0):.1f}%")
+
+        pac_actual = res.get("PAC", 0.0)
+        if "PAC" in lims and pac_actual < lims["PAC"][0]:
+            falta = lims["PAC"][0] - pac_actual
+            dex = falta * 1000.0 / 190.0
+            st.warning(f"🧊 Falta PAC: agrega aprox. {dex:.0f} g de Dextrosa para mejorar 'coldness'.")
+
+if __name__ == "__main__":
+    main()
