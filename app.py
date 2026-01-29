@@ -5,117 +5,68 @@ import unicodedata
 import os
 
 # ================= 1. CONFIGURACIÓN (Limpia) =================
-st.set_page_config(
+st.set_page_config
+st.markdown("""
+    <style>
+    /* 1. Fondo general y textos */
+    .stApp {
+        background-color: #ffffff;
+    }
+    h1, h2, h3 {
+        color: #2fb692 !important; /* Títulos en Verde Azulado */
+    }
+    
+    /* 2. Métricas y Tarjetas */
+    div[data-testid="stMetricValue"] {
+        color: #e643aa; /* Números en Rosa Palomo */
+        font-weight: 800 !important;
+    }
+    div[data-testid="metric-container"] {
+        background-color: #f0fdf4; /* Fondo muy sutil */
+        border-left: 5px solid #2fb692; /* Borde Verde */
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    /* 3. Botones y Selectores */
+    .stButton > button {
+        background-color: #e643aa !important;
+        color: white !important;
+        border-radius: 8px;
+        border: none;
+    }
+    .stSelectbox label, .stNumberInput label {
+        color: #2fb692 !important;
+        font-weight: bold;
+    }
+    
+    /* 4. Alertas Personalizadas */
+    .stAlert {
+        background-color: #afffb8; /* Fondo Menta para avisos */
+        color: #1a5c48; /* Texto oscuro para contraste */
+    }
+    
+    /* 5. Ajustes de la Tabla */
+    iframe[title="streamlit.data_editor"] {
+        border: 1px solid #8feeff !important;
+        border-radius: 8px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+(
     page_title="El Palomo · Formulador",
     page_icon="🍦",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Tema y CSS global para aplicar la paleta a TODOS los elementos
-PRIMARY = "#2fb692"    # Verde Azulado - titulos, bordes
-ACCENT = "#e643aa"     # Rosa Palomo - botones, métricas
-BG = "#f7fffb"         # Fondo suave menta
-CARD_BG = "#ffffff"    # Fondo de contenedores (blanco para contraste)
-TEXT = "#123e2f"       # Texto primario oscuro
-MUTED = "#6b776f"      # Texto secundario
-BORDER = "#d9f6ea"
-
-st.markdown(f"""
+# CSS MÍNIMO (Solo para ajustar espacios, sin tocar colores)
+st.markdown("""
     <style>
-    /* Global */
-    html, body, .stApp, .block-container {{
-        background: {BG} !important;
-        color: {TEXT} !important;
-        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    }}
-
-    /* Headers */
-    h1, h2, h3, .css-1v3fvcr h1, .css-1v3fvcr h2, .css-1v3fvcr h3 {{
-        color: {PRIMARY} !important;
-        font-weight: 700;
-    }}
-
-    /* Metrics */
-    div[data-testid="stMetricValue"] {{
-        color: {ACCENT} !important;
-        font-weight: 800 !important;
-    }}
-div[data-testid="metric-container"] {{
-        background-color: {CARD_BG} !important;
-        border-left: 4px solid {PRIMARY} !important;
-        box-shadow: 0 2px 6px rgba(18,62,47,0.06);
-        padding: 0.75rem 1rem !important;
-        border-radius: 10px;
-    }}
-
-    /* Buttons */
-    .stButton > button, .css-1hsw967 {{
-        background-color: {ACCENT} !important;
-        color: white !important;
-        border-radius: 8px !important;
-        border: none !important;
-        box-shadow: none !important;
-    }}
-
-    /* Inputs and Selects */
-    .stSelectbox label, .stNumberInput label, label {{
-        color: {PRIMARY} !important;
-        font-weight: 700 !important;
-    }}
-    .stTextInput>div>input, .stNumberInput>div>input, textarea {{
-        background: {CARD_BG} !important;
-        color: {TEXT} !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 8px !important;
-    }}
-
-    /* Sidebar */
-    .css-1d391kg .css-1v3fvcr, .css-1d391kg .css-1v3fvcr .css-1outpf7 {{
-        background: linear-gradient(180deg, {BG}, {CARD_BG}) !important;
-        color: {TEXT} !important;
-    }}
-
-    /* Data editor / tablas */
-    iframe[title="streamlit.data_editor"], .stDataFrame, .css-1cpxqw2 {{
-        background: {CARD_BG} !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 8px !important;
-        color: {TEXT} !important;
-    }}
-
-    /* Expander */
-    .stExpander, .stExpander .stButton {{
-        background: transparent !important;
-        color: {TEXT} !important;
-    }}
-
-    /* Alerts and captions */
-    .stAlert {{
-        background-color: #eaffef !important;
-        color: {TEXT} !important;
-        border: 1px solid {BORDER} !important;
-    }}
-    .stCaption, .stMarkdown p, .stMarkdown span {{
-        color: {MUTED} !important;
-    }}
-
-    /* Links */
-    a, a:link, a:visited {{
-        color: {PRIMARY} !important;
-    }}
-
-    /* Code blocks */
-    pre, code {{
-        background: #f3f6f3 !important;
-        color: {TEXT} !important;
-        border-radius: 6px !important;
-        padding: 0.25rem 0.5rem !important;
-    }}
-
-    /* Reduce excessive spacing */
-    .block-container {{ padding-top: 1.0rem; padding-bottom: 0.75rem; }}
-    [data-testid="stMetricValue"] {{ font-size: 1.4rem !important; }}
+    /* Reducir espacio superior excesivo */
+    .block-container { padding-top: 1.5rem; padding-bottom: 1rem; }
+    
+    /* Ajuste para que las métricas se vean más compactas */
+    [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -136,9 +87,7 @@ class GelatoEngine:
 
     @staticmethod
     def normalize_cols(df: pd.DataFrame) -> pd.DataFrame:
-        df = df.copy()
         df.columns = (df.columns
-                      .astype(str)
                       .str.strip()
                       .str.upper()
                       .map(lambda x: unicodedata.normalize('NFKD', x)
@@ -148,13 +97,12 @@ class GelatoEngine:
 
     @staticmethod
     def calculate_mix(receta_df: pd.DataFrame, db_df: pd.DataFrame):
-        if receta_df is None or receta_df.empty or db_df is None:
+        if receta_df.empty or db_df is None:
             return {}, 0
 
         merged = receta_df.merge(db_df, on='INGREDIENTE', how='left').fillna(0)
         total_peso = merged['GRAMOS'].sum()
-        if total_peso == 0:
-            return {}, 0
+        if total_peso == 0: return {}, 0
 
         metrics = {}
         targets = ['GRASA', 'SOLIDOS', 'POD', 'PAC', 'LACTOSA', 'PROTEINA']
@@ -163,10 +111,9 @@ class GelatoEngine:
             if t in merged.columns:
                 aporte_total = (merged['GRAMOS'] * merged[t] / 100).sum()
                 if t in ['POD', 'PAC']:
-                    # POD / PAC se expresan en g por litro (escala distinta)
-                    metrics[t] = aporte_total * (1000.0 / total_peso)
+                    metrics[t] = aporte_total * (1000 / total_peso)
                 else:
-                    metrics[t] = (aporte_total / total_peso) * 100.0
+                    metrics[t] = (aporte_total / total_peso) * 100
             else:
                 metrics[t] = 0.0
         
@@ -179,8 +126,8 @@ def load_database():
         try:
             df = pd.read_csv(filename)
             return GelatoEngine.normalize_cols(df)
-        except Exception as e:
-            st.warning(f"Error leyendo {filename}: {e}")
+        except:
+            pass
     return None
 
 # ================= 3. APP UI (Visualmente Robusta) =================
@@ -201,17 +148,14 @@ def main():
         st.warning("⚠️ No encuentro 'Ingredientes.csv'")
         uploaded = st.file_uploader("Sube tu archivo", type=['csv'])
         if uploaded:
-            try:
-                db = GelatoEngine.normalize_cols(pd.read_csv(uploaded))
-            except Exception as e:
-                st.error(f"No se pudo leer el archivo: {e}")
-                st.stop()
+            db = GelatoEngine.normalize_cols(pd.read_csv(uploaded))
         else:
             st.stop()
             
-    lista_ingredientes = sorted(db['INGREDIENTE'].dropna().unique().tolist())
+    lista_ingredientes = sorted(db['INGREDIENTE'].unique().tolist())
 
     # --- DIVISIÓN DE PANTALLA ---
+    # Usamos un ratio 60% / 40% para dar más aire a los números
     col_editor, col_results = st.columns([1.5, 1], gap="large")
 
     # === IZQUIERDA: EDITOR ===
@@ -230,7 +174,7 @@ def main():
                     "Ingrediente",
                     options=lista_ingredientes,
                     required=False,
-                    width="large"
+                    width="large" # Más ancho para leer bien
                 ),
                 "GRAMOS": st.column_config.NumberColumn(
                     "Gramos",
@@ -243,7 +187,7 @@ def main():
             num_rows="dynamic",
             use_container_width=True,
             hide_index=True,
-            height=450
+            height=450 # Altura fija cómoda
         )
         
         # Limpieza
@@ -255,12 +199,17 @@ def main():
     with col_results:
         res, peso = GelatoEngine.calculate_mix(receta_clean, db)
         
-        # 1. Peso Total
-        with st.container():
+        # 1. Peso Total (Usando contenedor nativo para borde)
+        with st.container(border=True):
             cols_peso = st.columns([3, 1])
             cols_peso[0].markdown("### ⚖️ Peso Total")
+            
+            delta_color = "normal"
+            if 990 <= peso <= 1010: delta_color = "off" # Gris si está bien
+            else: delta_color = "inverse" # Rojo/Verde si está mal
+            
             cols_peso[1].metric("Gramos", f"{peso:.0f}", delta=None, label_visibility="collapsed")
-
+            
             if peso > 0 and (peso < 990 or peso > 1010):
                 st.caption("⚠️ Ajusta a 1000g para mayor precisión")
 
@@ -277,31 +226,30 @@ def main():
                 lims = {'POD':(0,999), 'PAC':(0,999), 'GRASA':(0,100), 'SOLIDOS':(0,100)}
 
             # --- VISUALIZACIÓN DE MÉTRICAS ---
+            # Función helper para mostrar métrica con color nativo
             def mostrar_metric(label, key, suffix=""):
-                val = res.get(key, 0.0)
+                val = res.get(key, 0)
                 mn, mx = lims.get(key, (0,0))
                 
+                # Determinamos el "delta" (flechita y color)
                 delta_val = None
-                delta_color = "normal"
-
-                if val < mn:
+                delta_color = "off" # Gris por defecto
+                
+                if val < mn: 
                     delta_val = f"Bajo ({mn}-{mx})"
-                    delta_color = "inverse"
+                    delta_color = "inverse" # Rojo
                 elif val > mx:
                     delta_val = f"Alto ({mn}-{mx})"
-                    delta_color = "inverse"
+                    delta_color = "inverse" # Rojo
                 else:
                     delta_val = "✅ En rango"
-                    delta_color = "normal"
+                    delta_color = "normal" # Verde
+                
+                if "Custom" in tipo: delta_val = None
 
-                if "Custom" in tipo:
-                    delta_val = None
+                st.metric(label, f"{val:.1f}{suffix}", delta=delta_val, delta_color=delta_color)
 
-                # Mostrar con un decimal si es porcentaje o valor
-                display = f"{val:.1f}{suffix}"
-                st.metric(label, display, delta=delta_val, delta_color=delta_color)
-
-            # Fila 1: POD / PAC
+            # Fila 1: POD / PAC (Lo más importante)
             c1, c2 = st.columns(2)
             with c1: mostrar_metric("POD (Dulzor)", "POD")
             with c2: mostrar_metric("PAC (Frío)", "PAC")
@@ -311,7 +259,7 @@ def main():
             with c3: mostrar_metric("Grasa", "GRASA", "%")
             with c4: mostrar_metric("Sólidos Tot.", "SOLIDOS", "%")
 
-            # Fila 3: Secundarios
+            # Fila 3: Secundarios (En contenedor gris o transparente)
             with st.expander("Ver detalles (Proteína / Lactosa)", expanded=True):
                 c5, c6 = st.columns(2)
                 c5.metric("Proteína", f"{res.get('PROTEINA',0):.1f}%")
@@ -321,7 +269,7 @@ def main():
             pac_actual = res.get('PAC', 0)
             if pac_actual < lims['PAC'][0]:
                 falta = lims['PAC'][0] - pac_actual
-                dex = falta * 1000.0 / 190.0
+                dex = falta * 1000 / 190
                 st.warning(f"🧊 **Falta PAC:** El helado estará duro. Agrega aprox. **{dex:.0f}g** de Dextrosa.")
 
         else:
